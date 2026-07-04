@@ -11,8 +11,8 @@
 
 #weatherBox {
   position: absolute;
-  top: 120px;
-  right: 10px;
+  top: 100px;
+  right: 15px;
   z-index: 1000;
 
   background: rgba(33, 150, 243, 0.85);
@@ -435,49 +435,67 @@ body {
   bottom: 10px;
   left: 10px;
 
-  width: 55vw;
-  max-width: 420px;
+  width: 80vw;
+  max-width: 500px;
 
   height: 45dvh;
   max-height: 500px;
-
-  display: flex;
-  flex-direction: column;
 
   background: white;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.4);
 
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   z-index: 9999;
+
+  color: #000;
 }
 
-.legenda-header {
-  padding: 16px;
-  font-size: 27px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  cursor: pointer;
-  background: linear-gradient(135deg, #C2185B, #7B1FA2);
-  color: white;
+.legenda-header{
+    flex-shrink:0;
+    background: linear-gradient(135deg,#C2185B,#7B1FA2);
+    color:#fff;
+    padding:18px;
+    font-size:25px;
+    font-weight:bold;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+#btnLegenda {
+  font-size: 25px;
 }
 
 /* conteúdo interno */
 #conteudoLegenda {
   flex: 1;
-  padding: 6px 8px; /* 🔥 menor espaço */
+  padding: 10px;
   overflow-y: auto;
+  min-height: 0;
 }
 
 /* 🔥 estado minimizado */
 .legenda-box.minimizada {
-  height: 45px;
+  height: 60px; /* mesma altura do header */
 }
 
 .legenda-box.minimizada #conteudoLegenda {
   display: none;
-}/* 🔥 animação do card */
+}
+
+.legenda-box.minimizada .legenda-header {
+  height: 100%;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 @keyframes aparecerCard {
   0% {
     transform: translateY(20px) scale(0.95);
@@ -525,6 +543,25 @@ body {
 .setinho-npc {
   animation: brilhoSetinho 2s infinite;
 }
+
+#logoMapa{
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+}
+
+#logoMapa img{
+    height: 90px;          /* ajuste o tamanho */
+    border-radius: 15px;   /* opcional */
+    cursor: pointer;
+    transition: .25s;
+}
+
+#logoMapa img:hover{
+    transform: scale(1.08);
+}
 </style>
 </head>
 
@@ -569,15 +606,19 @@ body {
 </div>
 <div id="legendaInteligente" class="legenda-box">
 
-  <div class="legenda-header" onclick="toggleLegenda()">
-    <span>📍 Filtros</span>
-    <span id="btnLegenda">➖</span>
-  </div>
-
+    <div class="legenda-header" onclick="toggleLegenda()">
+        📍 Filtros
+        <span id="btnLegenda">➖</span>
+    </div>
   <div id="conteudoLegenda"></div>
 
 </div>
 <div id="map"></div>
+
+<div id="logoMapa">
+        <img src="https://github.com/adotpetofc/adotpet/blob/main/imagens/logo.jpeg?raw=true" alt="AdotPet">
+    </a>
+</div>
 
 <script>
 
