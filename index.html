@@ -1,0 +1,1999 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Pets para Adoção 🐾</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+
+#weatherBox {
+  position: absolute;
+  top: 70px;
+  right: 10px;
+  z-index: 1000;
+
+  background: rgba(33, 150, 243, 0.85);
+  backdrop-filter: blur(6px);
+
+  color: white;
+  padding: 6px 8px;       /* 🔥 mínimo */
+  border-radius: 8px;
+
+  box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+
+  text-align: center;
+  min-width: 70px;        /* 🔥 bem pequeno */
+}
+
+/* cidade menor */
+#weatherCity {
+  font-size: 9px;
+  opacity: 0.9;
+}
+
+/* temperatura destaque */
+#weatherTemp {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* descrição quase invisível */
+#weatherDesc {
+  font-size: 8px;
+  opacity: 0.8;
+}
+
+#chatBox {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  width: 50vw;        /* ocupa 90% da tela */
+  max-width: 320px;   /* mas nunca passa disso */
+
+  height: 40vh;       /* 60% da altura da tela */
+  max-height: 400px;  /* limite máximo */
+
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+#chatHeader {
+  background: linear-gradient(135deg, #C2185B, #7B1FA2);
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+#chatMensagens {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+#chatInputArea {
+  display: flex;
+}
+
+#chatInputArea input {
+  flex: 1;
+  border: none;
+  padding: 10px;
+}
+
+#chatInputArea button {
+  border: none;
+  background: #C2185B;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+}
+/* 🌞 MODO DIA (PADRÃO) */
+body.dia {
+  background: #FFF3EE;
+  color: #333;
+}
+
+/* 🌙 MODO NOITE */
+body.noite {
+  background: #121212;
+  color: #eee;
+}
+
+/* Ajustes no mapa (escurecer levemente) */
+body.noite #map {
+  filter: brightness(0.95) contrast(1.05) saturate(1.1);
+}
+
+/* Menu no modo escuro */
+body.noite .fab-main {
+  background: linear-gradient(135deg, #333, #555);
+}
+
+body.noite .fab-btn {
+  background: #2a2a2a;
+}
+
+body.noite .barra-busca {
+  background: #1e1e1e;
+}
+
+body.noite .barra-busca input {
+  background: #333;
+  color: #fff;
+}
+body {
+  margin:0;
+  font-family: Arial;
+  background: #FFF3EE;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100%;
+  height: 100%;
+}
+
+/* MENU FLUTUANTE */
+body {
+  margin: 0;
+  font-family: Arial;
+  overflow: hidden; /* AQUI */
+}
+.menu-fab {
+  position: fixed; /* 🔥 MUITO IMPORTANTE */
+  top: 90px;
+  left: 10px; /* margem segura */
+  z-index: 9999;
+}
+
+/* botão principal */
+.fab-main {
+  width: 40px;
+  height: 40px;
+  border-radius: 20%;
+  border: none;
+  background: linear-gradient(135deg, #C2185B, #7B1FA2);
+  color: white;
+  font-size: 25px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+  transition: 0.3s;
+}
+
+.fab-main:hover {
+  transform: rotate(90deg);
+}
+
+/* opções escondidas */
+.fab-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: 0.3s;
+}
+
+/* quando abre */
+.menu-fab.ativo .fab-options {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0);
+}
+
+/* botões do menu */
+.fab-btn {
+  width: 200px;
+  padding: 10px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* cores */
+.btn-form {
+  background: linear-gradient(135deg, #C2185B, #7B1FA2);
+}
+
+.btn-wpp {
+  background: #25D366; /* mantém padrão WhatsApp */
+}
+
+.btn-pix {
+  background: linear-gradient(135deg, #3F51B5, #7B1FA2);
+}
+
+.btn-loc {
+  background: #4CAF50;
+}
+
+.label-mapa {
+  background: linear-gradient(135deg, #3F51B5, #7B1FA2);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.barra-busca {
+  position:absolute;
+  top: 20px;
+  right:15px;
+  z-index:1000;
+  background: linear-gradient(135deg, #C2185B, #7B1FA2);
+  padding:12px 16px;
+  border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.4);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.barra-busca input {
+  border:none;
+  outline:none;
+  font-size:14px;
+  width:200px;
+  padding:6px 8px;
+  border-radius:6px;
+}
+
+.barra-busca span {
+  font-size:18px;
+}
+#chatBox.minimizado {
+  height: 45px;
+}
+
+#chatBox.minimizado #chatMensagens,
+#chatBox.minimizado #chatInputArea {
+  display: none;
+}
+#chatBox {
+  color: #000;
+}
+
+#chatMensagens {
+  color: #000;
+}
+
+#chatInputArea input {
+  color: #000;
+}
+
+#chatMensagens {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 13px;
+
+  min-height: 0; /* 🔥 ESSENCIAL (corrige bug do botão sumir) */
+}
+
+#chatInputArea {
+  display: flex;
+  flex-shrink: 0; /* 🔥 impede o botão de desaparecer */
+}
+
+#chatBox {
+  position: fixed;
+  bottom: 10px; /* diminui um pouco */
+  right: 10px;
+
+  width: 50vw;       /* 🔥 ocupa mais largura no celular */
+  max-width: 320px;
+
+  height: 40dvh;     /* 🔥 troca vh por dvh (corrige bug do teclado) */
+  max-height: 400px;
+}
+
+/* 🔥 garante que o input nunca suma */
+#chatInputArea {
+  display: flex;
+  flex-shrink: 0;
+  border-top: 1px solid #ccc; /* ajuda visualmente */
+}
+
+#chatInputArea input {
+  flex: 1;
+  min-width: 0; /* 🔥 MUITO importante no mobile */
+}
+
+#chatInputArea button {
+  white-space: nowrap; /* impede quebrar texto */
+}
+.legenda-mapa {
+  background: rgba(255,255,255,0.9);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  line-height: 1.4;
+  max-width: 160px;
+}
+
+.legenda-mapa span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+#legendaInteligente {
+  position: absolute;
+  bottom: 15px;
+  left: 10px;
+  z-index: 1000;
+
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(6px);
+
+  padding: 10px;
+  border-radius: 12px;
+
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+  max-width: 180px;
+}
+
+.legenda-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px; /* 🔥 menor espaço */
+  cursor: pointer;
+  font-size: 11px; /* 🔥 texto menor */
+}
+
+.legenda-left {
+  display: flex;
+  align-items: center;
+  gap: 4px; /* 🔥 mais compacto */
+}
+
+.legenda-bolinha {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legenda-item.ativo {
+  opacity: 1;
+}
+
+.legenda-item.inativo {
+  opacity: 0.4;
+}
+
+/* muda cor do TEXTO da legenda */
+#legendaInteligente {
+  color: #333; /* cor geral */
+}
+
+/* texto dentro de cada item */
+.legenda-item {
+  color: #444; /* cor das palavras */
+  font-weight: 500;
+}
+
+/* quando estiver ATIVO */
+.legenda-item.ativo {
+  color: #000; /* mais forte */
+}
+
+/* quando estiver DESATIVADO */
+.legenda-item.inativo {
+  color: #999; /* apagado */
+}
+
+/* ícones + texto lado esquerdo */
+.legenda-left {
+  color: inherit;
+}
+.legenda-box {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+
+  width: 32vw;        /* 🔥 menor */
+  max-width: 260px;   /* 🔥 mais compacto */
+
+  height: 30dvh;      /* 🔥 menor altura */
+  max-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.legenda-header {
+  padding: 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  background: linear-gradient(135deg, #C2185B, #7B1FA2);
+  color: white;
+}
+
+/* conteúdo interno */
+#conteudoLegenda {
+  flex: 1;
+  padding: 6px 8px; /* 🔥 menor espaço */
+  overflow-y: auto;
+}
+
+/* 🔥 estado minimizado */
+.legenda-box.minimizada {
+  height: 45px;
+}
+
+.legenda-box.minimizada #conteudoLegenda {
+  display: none;
+}/* 🔥 animação do card */
+@keyframes aparecerCard {
+  0% {
+    transform: translateY(20px) scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* aplica no conteúdo do popup */
+.leaflet-popup-content {
+  animation: aparecerCard 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ✨ brilho do Setinho */
+@keyframes brilhoSetinho {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255,215,0,0.6);
+  }
+
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 25px rgba(255,215,0,1);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255,215,0,0.6);
+  }
+}
+
+.setinho-npc {
+  animation: brilhoSetinho 2s infinite;
+}
+</style>
+</head>
+
+<body>
+
+<div class="menu-fab" id="menuFab">
+  <button class="fab-main" onclick="toggleMenu()">☰</button>
+
+  <div class="fab-options">
+    <button class="fab-btn btn-form" onclick="abrirFormulario()">➕ Cadastrar Pet</button>
+    <button class="fab-btn btn-wpp" onclick="abrirGrupo()">💬 Grupo WhatsApp</button>
+    <button class="fab-btn btn-pix" onclick="abrirPix()">💖 Apoiar</button>
+  </div>
+
+
+
+</div>
+
+<div class="barra-busca">
+  <span>🔍</span>
+  <input type="text" id="busca" placeholder="Buscar pet ou contato...">
+</div>
+
+<div id="chatBox">
+  <div id="chatHeader" onclick="toggleChat()">
+    💬 Chat AdotPet
+    <span>➖</span>
+  </div>
+
+  <div id="chatMensagens"></div>
+
+  <div id="chatInputArea">
+    <input type="text" id="chatInput" placeholder="Digite sua mensagem...">
+    <button onclick="enviarMensagem()">Enviar</button>
+  </div>
+</div>
+
+<div id="weatherBox">
+  <div id="weatherCity">📍 Carregando...</div>
+  <div id="weatherTemp">--°C</div>
+  <div id="weatherDesc">...</div>
+</div>
+<div id="legendaInteligente" class="legenda-box">
+
+  <div class="legenda-header" onclick="toggleLegenda()">
+    <span>📍 Filtros</span>
+    <span id="btnLegenda">➖</span>
+  </div>
+
+  <div id="conteudoLegenda"></div>
+
+</div>
+<div id="map"></div>
+
+<script>
+
+const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdw1-6EqCFyd0bR8PoiKFF16i3k2qhp-vRclKHiSFrA0JYXAA/viewform";
+const WHATSAPP_URL = "https://chat.whatsapp.com/HIlAlWLbnJn8Kf5Hq9lHrf?mode=gi_t";
+const APOIA_URL = "https://sites.google.com/view/adotpet/apoiar";
+
+function abrirFormulario() {
+  window.open(FORM_URL, "_blank");
+}
+
+function abrirGrupo() {
+  window.open(WHATSAPP_URL, "_blank");
+}
+
+function abrirPix() {
+  window.open(APOIA_URL, "_blank");
+}
+
+const pets = [
+
+  {
+    animal: "Zoonoses",
+    contato: "None",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/unnamed%20(1).png?raw=true",
+    lat: -10.919417568714428,
+    lng: -37.679622598948676,
+    status: "apoiador"
+  },
+  {
+    animal: "Marrom",
+    contato: "7999386733",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Marrom.jpg?raw=true",
+    lat: -10.925187028930313,
+    lng: -37.656179321166256,
+    status: "resgatar"
+  },
+  {
+    animal: "Ninhada de gatinhos (Energisa)",
+    contato: "7999957345",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/gatos-origens.png?raw=true",
+    lat: -10.918632954774361,
+    lng: -37.664031901314374,
+    status: "resgatar"
+  },
+  {
+    animal: "Motoca",
+    contato: "7999957345",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Motoca.jpg?raw=true",
+    lat: -10.91874671303335,
+    lng: -37.66380285200526,
+    status: "adotar"
+  },
+  {
+    animal: "Pretinha",
+    contato: "7996413969",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Pretinha.jpg?raw=true",
+    lat: -10.910973327182864,
+    lng: -37.662836177397466,
+    status: "resgatar"
+  },
+  {
+    animal: "Ninhada de cachorrinhos (Gustavo Hora)",
+    contato: "7999861877",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Ninhada%20de%20cachorrinhos%20(Gustavo%20Hora).jpg?raw=true",
+    lat: -10.921686946905048,
+    lng: -37.68547848107608,
+    status: "adotar"
+  },
+  {
+    animal: "Ninhada de gatinhos (R. Raimundo Reis)",
+    contato: "7996058608",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/gatos-origens.png?raw=true",
+    lat: -10.91399764149734,
+    lng: -37.67838171352178,
+    status: "resgatar"
+  },
+  {
+    animal: "Théo",
+    contato: "79999487203",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Th%C3%A9o.jpg?raw=true",
+    lat: -10.925037257885851,
+    lng: -37.655439031519045,
+    status: "adotado"
+  },
+    {
+    animal: "Gray",
+    contato: "7998594019",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/WhatsApp%20Image%202026-04-13%20at%2014.25.23.jpeg?raw=true",
+    lat: -11.071628293270324,
+    lng: -37.72456063987997,
+    status: "adotar"
+  },
+  {
+    animal: "LIA - IFS",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/WhatsApp%20Image%202026-04-01%20at%2012.54.37.png?raw=true",
+    lat: -10.93852888636687,
+    lng: -37.65664191131559,
+    status: "apoiador"
+  },
+  {
+    animal: "Méd. Vet. Daiane Silva",
+    contato: "7999751912",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/WhatsApp%20Image%202026-04-18%20at%2000.21.53.jpeg?raw=true",
+    lat: -10.927275585854852,
+    lng: -37.65915562555365,
+    status: "apoiador"
+  },
+  {
+    animal: "Elidoces Gourmet",
+    contato: "7998793438",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/elidoce.png?raw=true",
+    lat: -10.919472607510611,
+    lng: -37.68176930609867,
+    status: "apoiador"
+  },
+  {
+    animal: "Ivanildo Santos (Colaborador)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/ivan.jpg?raw=true",
+    lat: -11.069704373684413,
+    lng: -37.72683832687771,
+    status: "colaborador"
+  },
+  {
+    animal: "Ernesto Silva (Colaborador)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/ernesto.jpg?raw=true",
+    lat: -10.919292508155438,
+    lng: -37.668182624562796,
+    status: "colaborador"
+  },
+  {
+    animal: "Leonardo (O Idealizador)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/unnamed.jpg?raw=true",
+    lat: -10.916728918514597,
+    lng: -37.669135282506380,
+    status: "colaborador"
+  },
+  {
+    animal: "Secretaria Municipal de Saúde",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/unnamed.png?raw=true",
+    lat: -10.918325697777808,
+    lng: -37.67585382343458,
+    status: "parceiro"
+  },
+  {
+    animal: "Chico (Adotado)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/chico.jpg?raw=true",
+    lat: -10.917523221890216,
+    lng: -37.66104200193335,
+    status: "adotado"
+  },
+  {
+    animal: "Tom (Adotado)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/tom.jpg?raw=true",
+    lat: -10.917403221890216,
+    lng: -37.66084200193335,
+    status: "adotado"
+  },
+  {
+    animal: "Mel (Adotado)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/mel.jpg?raw=true",
+    lat: -10.920702061225724,
+    lng: -37.66240529574209,
+    status: "adotado"
+  },
+  {
+    animal: "Ninhada de gatinhos (Horta)",
+    contato: "79999165542",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Ninhada%20de%20gatinhos%20(Horta).jpg?raw=true",
+    lat: -10.925080831616562,
+    lng: -37.656793242411,
+    status: "resgatar"
+  },
+  {
+    animal: "Ninhada de gatinhos (Rua D, Albano)",
+    contato: "7999641504",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Ninhada%20de%20gatos%20(Rua%20D,%20Albano).jpg?raw=true",
+    lat: -10.930556151571192,
+    lng: -37.67437740450676,
+    status: "adotar"
+  },
+  {
+    animal: "Ninhada de gatinhos (Barro Preto)",
+    contato: "7996620681",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/barro%20preto.jpg?raw=true",
+    lat: -11.065323559866082,
+    lng: -37.76933872882397,
+    status: "adotar"
+  },
+  {
+    animal: "Astro (Laudelino Freire)",
+    contato: "7998669447",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Astro%20(Laudelino%20Freire).jpg?raw=true",
+    lat: -10.91151476570264,
+    lng: -37.68049201531701,
+    status: "adotar"
+  },
+  {
+    animal: "Digital Shelter",
+    contato: " ",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/unnamed%20(2).png?raw=true",
+    lat: -10.939100718057047,
+    lng: -37.657256941250445,
+    status: "parceiro"
+  },
+  {
+    animal: "TSNB",
+    contato: " ",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/tsnb.jpg?raw=true",
+    lat: -10.925205986018973,
+    lng: -37.65545920394519,
+    status: "parceiro"
+  },
+  {
+    animal: "Ninhada de gatos (Sergipe Madeiras)",
+    contato: " ",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Ninhada%20de%20gatos%20(Sergipe%20Madeiras)%20(2).jpg?raw=true",
+    lat: -10.921138177386574,
+    lng: -37.66335698552644,
+    status: "resgatar"
+  },
+  {
+    animal: "Pet p/ adoção - Cuidadora Keila",
+    contato: "7981402153",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/cuidadores.jpg?raw=true",
+    lat: -10.913140119327084,
+    lng: -37.65102503482476,
+    status: "apoiador"
+  },
+  {
+    animal: "Walter (Adotado)",
+    contato: "-",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Walter.jpg?raw=true",
+    lat: -10.909959123885038,
+    lng: -37.67138099852364,
+    status: "adotado"
+  },
+  {
+    animal: "Casinha comunitária",
+    contato: "7996701204",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/cazinha%20comunit%C3%A1ria.jpg?raw=true",
+    lat: -10.909341587056023,
+    lng: -37.65977485124454,
+    status: "apoiador"
+  },
+  {
+    animal: "Melinha",
+    contato: "7996701204",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/melinha.png?raw=true",
+    lat: -10.909201766364973,
+    lng: -37.65959708421757,
+    status: "adotar"
+  },
+  {
+    animal: "Cãotinho da Elzy (Creche e Hotel)",
+    contato: "7999862515",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/c%C3%A3otinho.png?raw=true",
+    lat: -10.914749524225831,
+    lng: -37.672208371553275,
+    status: "apoiador"
+  },
+  {
+    animal: "Pet p/ adoção - Cuidadora Monise",
+    contato: "19991797609",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/cuidadores.jpg?raw=true",
+    lat: -10.925250774788658,
+    lng: -37.68620382378702,
+    status: "apoiador"
+  },
+  {
+    animal: "Pet p/ adoção - Cuidador João Neto",
+    contato: "7996471900",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/cuidadores.jpg?raw=true",
+    lat: -10.919355839413788,
+    lng: -37.031921227891644,
+    status: "apoiador"
+  },
+  {
+    animal: "Ninhada de gatinhos (Filadelfo Dórea)",
+    contato: "7988693666",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/WhatsApp%20Image%202026-05-27%20at%2012.51.37.jpeg?raw=true",
+    lat: -10.916543119083107,
+    lng: -37.66585640456769,
+    status: "adotar"
+  },
+  {
+    animal: "Doguinho do CentroSul (Adotado)",
+    contato: "",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Doguinho%20CentroSul.jpg?raw=true",
+    lat: -10.923935861291268,
+    lng: -37.6699154230232,
+    status: "adotado"
+  },
+  {
+    animal: "Pitibull 10 meses (Tutora Marleide)",
+    contato: "7996729677",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Pitibull%2010%20meses%20(Adotado).jpg?raw=true",
+    lat: -10.915281154623473,
+    lng: -37.66724692022351,
+    status: "adotado"
+  },
+  {
+    animal: "Pretinho",
+    contato: "7996701204",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Pretinho.jpeg?raw=true",
+    lat: -10.909350097002461,
+    lng: -37.65956199568748,
+    status: "adotar"
+  },
+  {
+    animal: "Diana",
+    contato: "7996701204",
+    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Diana.jpeg?raw=true",
+    lat: -10.773668832498164,
+    lng: -37.83777687504117,
+    status: "adotar"
+  }
+];
+
+const parceiros = [
+];
+
+function aplicarTemaAutomatico() {
+  const hora = new Date().getHours();
+  const body = document.body;
+
+  // remove qualquer layer antes
+  map.eachLayer(layer => {
+    map.removeLayer(layer);
+  });
+
+  if (hora >= 6 && hora < 18) {
+    // 🌞 DIA
+    body.classList.add("dia");
+    body.classList.remove("noite");
+
+    mapaDia.addTo(map);
+  } else {
+    // 🌙 NOITE
+    body.classList.add("noite");
+    body.classList.remove("dia");
+
+    mapaNoite.addTo(map);
+  }
+}
+
+// Executa ao carregar
+
+var map = L.map('map').setView([-10.916945551073159, -37.669076549387405], 11.5);
+
+setTimeout(() => {
+  map.invalidateSize();
+}, 300);
+
+
+// 🌞 Mapa claro
+const mapaDia = L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+  maxZoom: 20,
+  attribution: '&copy; OpenStreetMap contributors'
+});
+
+// 🌙 Mapa escuro (SEM LIMITE)
+const mapaNoite = L.tileLayer(
+'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+{
+  subdomains: 'abcd',
+  maxZoom: 20,
+  attribution: '&copy; OpenStreetMap & CartoDB'
+});
+
+aplicarTemaAutomatico();
+
+
+let todosMarkers = [];
+let markersVisiveis = [];
+
+/* 🎨 CORES POR STATUS */
+function corStatus(status) {
+  switch (status) {
+    case "adotar": return "#4CAF50";     // verde
+    case "resgatar": return "#FF9800";   // laranja
+    case "ajuda": return "#2196F3";      // azul
+    case "perdido": return "#F44336";    // vermelho
+    case "adotado": return "#9E9E9E";    // cinza
+
+    case "parceiro": return "#9C27B0";   // roxo
+    case "apoiador": return "#3F51B5";   // azul escuro
+    case "colaborador": return "#009688"; // verde água
+
+    default: return "#C2185B";           // padrão
+  }
+}
+
+function iconeStatus(status) {
+  switch (status) {
+    case "adotar": return "🐶";
+    case "resgatar": return "🚑";
+    case "ajuda": return "🙏";
+    case "perdido": return "🔍";
+    case "adotado": return "❤️";
+
+    case "parceiro": return "🤝";
+    case "apoiador": return "💙";
+    case "colaborador": return "🛠️";
+
+    default: return "🐾";
+  }
+}
+
+/* PETS COM IMAGEM NO MARCADOR */
+pets.forEach(item => {
+  const cor = corStatus(item.status);
+  const simbolo = iconeStatus(item.status);
+
+  const iconePet = L.divIcon({
+  className: "",
+  html: `
+    <div style="position:relative;width:60px;height:60px;">
+
+      <!-- 🔥 SÍMBOLO EMBAIXO -->
+      <div style="
+        position:absolute;
+        bottom:-8px;
+        right:-8px;
+        background:${cor};
+        color:white;
+        font-size:14px;
+        width:22px;
+        height:22px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:50%;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);
+        z-index:2;
+      ">
+        ${simbolo}
+      </div>
+
+      <!-- FOTO -->
+      <div style="
+        width:60px;
+        height:60px;
+        border-radius:50%;
+        overflow:hidden;
+        border:4px solid ${cor};
+        box-shadow:0 4px 10px rgba(0,0,0,0.5);
+        background:white;
+      ">
+        <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.foto)}"
+             onerror="this.src='https://via.placeholder.com/60?text=🐾';"
+             style="width:100%;height:100%;object-fit:cover;">
+      </div>
+
+    </div>
+  `,
+  iconSize: [60, 60],
+  iconAnchor: [30, 30],
+  popupAnchor: [0, -30]
+});
+
+  let marker = L.marker([item.lat, item.lng], { icon: iconePet });
+
+  marker.bindTooltip(item.animal, {
+    permanent: true,
+    direction: "top",
+    offset: [0, -10],
+    className: "label-mapa"
+  }).openTooltip();
+
+  marker.bindPopup(`
+<div style="
+    width:215px;
+    background:#ffffff;
+    border-radius:22px;
+    overflow:hidden;
+    font-family:'Segoe UI',Arial,sans-serif;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+">
+
+<!-- Foto -->
+<div style="
+    position:relative;
+    width:100%;
+    height:180px;
+">
+
+    <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.foto)}"
+    onerror="this.onerror=null;this.src='https://via.placeholder.com/220x180';"
+    style="
+        width:100%;
+        height:100%;
+        object-fit:cover;
+    ">
+
+    <!-- Gradiente -->
+    <div style="
+        position:absolute;
+        inset:0;
+        background:linear-gradient(to top,
+            rgba(0,0,0,.65),
+            rgba(0,0,0,.05));
+    "></div>
+
+    <!-- Nome -->
+<div style="
+    position:absolute;
+    left:12px;
+    right:12px;
+    bottom:10px;
+    color:white;
+    font-size:15px;
+    font-weight:600;
+    text-shadow:0 2px 4px rgba(0,0,0,.7);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+">
+    🐾 ${item.animal}
+</div>
+
+    <!-- Status -->
+    <div style="
+        position:absolute;
+        top:12px;
+        right:12px;
+        background:#E91E63;
+        color:white;
+        padding:5px 12px;
+        border-radius:20px;
+        font-size:10px;
+        font-weight:bold;
+        box-shadow:0 2px 6px rgba(0,0,0,.3);
+    ">
+        ${item.status.toUpperCase()}
+    </div>
+
+</div>
+
+    <!-- Corpo -->
+    <div style="padding:12px;">
+
+        <div style="
+            text-align:center;
+            font-size:11px;
+            color:#666;
+            margin-bottom:10px;
+        ">
+            🐾 Procura um novo lar cheio de amor
+        </div>
+
+        <a href="https://wa.me/${item.contato}"
+            target="_blank"
+            style="
+                display:block;
+                background:#25D366;
+                color:white;
+                text-decoration:none;
+                text-align:center;
+                padding:7px;
+                border-radius:12px;
+                font-size:11px;
+                font-weight:bold;
+                margin-bottom:6px;
+            ">
+            💬 WhatsApp
+        </a>
+
+        <a href="https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${item.lat},${item.lng}"
+            target="_blank"
+            style="
+                display:block;
+                background:#7B1FA2;
+                color:white;
+                text-decoration:none;
+                text-align:center;
+                padding:7px;
+                border-radius:12px;
+                font-size:11px;
+                font-weight:bold;
+            ">
+            📍 Ver localização
+        </a>
+
+    </div>
+
+</div>
+`);
+
+todosMarkers.push({
+  marker,
+  nome: item.animal.toLowerCase(),
+  contato: (item.contato || "").toLowerCase(),
+  status: item.status   // 🔥 ESSENCIAL
+});
+
+});
+
+const tiposLegenda = [
+  { status: "adotar", nome: "Para adoção" },
+  { status: "resgatar", nome: "Resgate" },
+  { status: "adotado", nome: "Adotados" },
+  { status: "parceiro", nome: "Parceiros" },
+  { status: "apoiador", nome: "Apoiadores" },
+  { status: "colaborador", nome: "Colaboradores" }
+];
+
+let filtrosAtivos = {};
+
+// inicia tudo como ativo
+tiposLegenda.forEach(t => filtrosAtivos[t.status] = true);
+
+function criarLegenda() {
+
+  const box = document.getElementById("conteudoLegenda");
+
+  box.innerHTML = ``;
+
+  tiposLegenda.forEach(tipo => {
+
+    const cor = corStatus(tipo.status);
+    const icon = iconeStatus(tipo.status);
+
+    const div = document.createElement("div");
+    div.className = "legenda-item ativo";
+
+    div.innerHTML = `
+      <div class="legenda-left">
+        <span style="
+          display:inline-block;
+          width:10px;
+          height:10px;
+          border-radius:3px;
+          background:${cor};
+        "></span>
+
+        ${icon} ${tipo.nome}
+      </div>
+
+      <span>✔</span>
+    `;
+
+    div.onclick = () => {
+      filtrosAtivos[tipo.status] = !filtrosAtivos[tipo.status];
+
+      div.classList.toggle("inativo");
+
+      atualizarFiltroMapa();
+    };
+
+    box.appendChild(div);
+  });
+}
+
+function atualizarFiltroMapa() {
+
+  // remove todos do mapa
+  todosMarkers.forEach(item => {
+    map.removeLayer(item.marker);
+  });
+
+  // limpa lista
+  markersVisiveis = [];
+
+  // adiciona só os ativos
+  todosMarkers.forEach(item => {
+
+    if (filtrosAtivos[item.status]) {
+      item.marker.addTo(map);
+      markersVisiveis.push(item.marker);
+    }
+
+  });
+}
+
+criarLegenda();
+atualizarFiltroMapa();
+
+/* PARCEIROS (INALTERADO) */
+parceiros.forEach(p => {
+
+  const icone = L.divIcon({
+    className: "",
+    html: `
+      <div style="
+        width:60px;
+        height:60px;
+        border-radius:50%;
+        overflow:hidden;
+        border:4px solid white;
+        box-shadow:0 4px 10px rgba(0,0,0,0.5);
+        background:white;
+      ">
+        <img src="${p.foto}" style="
+          width:100%;
+          height:100%;
+          object-fit:cover;
+        ">
+      </div>
+    `,
+    iconSize: [60, 60],
+    iconAnchor: [30, 10],
+    popupAnchor: [0, -30]
+  });
+
+  const marker = L.marker([p.lat, p.lng], { icon: icone }).addTo(map);
+
+  marker.bindTooltip(p.nome + " (Parceiro)", {
+    permanent: true,
+    direction: "top",
+    offset: [0, -10],
+    className: "label-mapa"
+  });
+
+  marker.bindPopup(`
+  <div style="text-align:center;width:200px;">
+    <img src="${p.foto}" style="width:100%;border-radius:10px"/>
+    <b>${p.nome}</b><br><br>
+
+    <a href="https://wa.me/${p.contato}" target="_blank">
+      📞 Entrar em contato
+    </a>
+
+    <br><br>
+
+    Apoie essa iniciativa ❤️
+  </div>
+`);
+
+todosMarkers.push({
+  marker,
+  nome: item.animal.toLowerCase(),
+  contato: (item.contato || "").toLowerCase(),
+  status: item.status   // 🔥 ESSENCIAL
+});
+
+markersVisiveis.push(marker);
+
+});
+
+/* BUSCA */
+const input = document.getElementById("busca");
+
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+
+    const valor = input.value.toLowerCase().trim();
+
+    // procura o primeiro pet que bate com a busca
+    let encontrado = todosMarkers.find(item =>
+      item.nome.includes(valor) ||
+      item.contato.includes(valor)
+    );
+
+    if (encontrado) {
+      const pos = encontrado.marker.getLatLng();
+
+      // 🔥 move a câmera suavemente
+      map.setView(pos, 16, {
+        animate: true,
+        duration: 1.5
+      });
+
+      // 🔥 abre o popup automaticamente
+      encontrado.marker.openPopup();
+    }
+  }
+});
+/* ========================= */
+/* 🐱🐭 TOM E JERRY (COM CORREÇÕES) */
+/* ========================= */
+
+// 🔧 CONFIG
+const IMG_TOM = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSL26wUEodUAAIJnTs8lBWuzLbCvOqXfezGiA&s";
+const IMG_JERRY = "https://i.pinimg.com/originals/54/a3/e5/54a3e5f67177d32f6689f69aaeee3ed8.jpg";
+
+// 👉 fallback de pets (evita erro se estiver vazio)
+
+
+// 📍 centro seguro
+function calcularCentroPets() {
+  if (!pets || pets.length === 0) {
+    return { lat: -10.94, lng: -37.07 }; // fallback (Lagarto/SE)
+  }
+
+  let lat = 0, lng = 0;
+
+  pets.forEach(p => {
+    lat += Number(p.lat);
+    lng += Number(p.lng);
+  });
+
+  return {
+    lat: lat / pets.length,
+    lng: lng / pets.length
+  };
+}
+
+// 📏 raio seguro
+function calcularRaioPets(centro) {
+  if (!pets || pets.length === 0) {
+    return 0.01;
+  }
+
+  let maxDist = 0;
+
+  pets.forEach(p => {
+    let d = Math.sqrt(
+      Math.pow(p.lat - centro.lat, 2) +
+      Math.pow(p.lng - centro.lng, 2)
+    );
+    if (d > maxDist) maxDist = d;
+  });
+
+  return maxDist * 0.8 || 0.01;
+}
+
+// 🔥 densidade
+function calcularDensidade(lat, lng, raioBusca = 0.01) {
+  if (!pets || pets.length === 0) return 0;
+
+  let score = 0;
+
+  pets.forEach(p => {
+    let d = Math.sqrt(
+      Math.pow(p.lat - lat, 2) +
+      Math.pow(p.lng - lng, 2)
+    );
+
+    if (d < raioBusca) {
+      score += (1 - d / raioBusca);
+    }
+  });
+
+  return score;
+}
+
+// 🎯 ponto mais denso
+function buscarPontoMaisDenso(baseLat, baseLng) {
+  let melhor = { lat: baseLat, lng: baseLng, score: 0 };
+
+  for (let i = 0; i < 8; i++) {
+    let lat = baseLat + (Math.random() - 0.5) * raioTJ;
+    let lng = baseLng + (Math.random() - 0.5) * raioTJ;
+
+    let score = calcularDensidade(lat, lng);
+
+    if (score > melhor.score) {
+      melhor = { lat, lng, score };
+    }
+  }
+
+  return melhor;
+}
+
+// 🎨 ícones
+function criarIcone(img, fallback) {
+  return L.divIcon({
+    className: "",
+    html: `
+      <div style="
+        width:42px;
+        height:42px;
+        border-radius:50%;
+        overflow:hidden;
+        border:2px solid white;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);
+        background:white;
+      ">
+        <img src="${img}"
+             onerror="this.style.display='none'; this.parentElement.innerHTML='${fallback}';"
+             style="width:100%;height:100%;object-fit:cover;">
+      </div>
+    `,
+    iconSize: [42, 42],
+    iconAnchor: [21, 21]
+  });
+}
+
+// 🔍 garante que map existe
+if (typeof map === "undefined") {
+  console.error("❌ Mapa não inicializado. Crie o 'map' antes de rodar Tom e Jerry.");
+}
+
+// centro e raio
+let centroTJ = calcularCentroPets();
+let raioTJ = calcularRaioPets(centroTJ);
+
+// estados
+let estadoJerry = {
+  lat: centroTJ.lat,
+  lng: centroTJ.lng,
+  vx: 0,
+  vy: 0,
+  alvoLat: centroTJ.lat,
+  alvoLng: centroTJ.lng,
+  timer: 0
+};
+
+let estadoTom = {
+  lat: centroTJ.lat + 0.001,
+  lng: centroTJ.lng + 0.001,
+  vx: 0,
+  vy: 0,
+  alvoLat: centroTJ.lat,
+  alvoLng: centroTJ.lng,
+  timer: 0
+};
+
+const iconeTom = criarIcone(IMG_TOM, "🐱");
+const iconeJerry = criarIcone(IMG_JERRY, "🐭");
+
+let markerJerry = L.marker([estadoJerry.lat, estadoJerry.lng], { icon: iconeJerry }).addTo(map);
+let markerTom = L.marker([estadoTom.lat, estadoTom.lng], { icon: iconeTom }).addTo(map);
+
+// 🐭 Jerry
+function atualizarJerry() {
+
+  estadoJerry.timer--;
+
+  if (estadoJerry.timer <= 0) {
+    estadoJerry.timer = Math.floor(Math.random() * 120) + 40;
+
+    let ponto = buscarPontoMaisDenso(estadoJerry.lat, estadoJerry.lng);
+
+    estadoJerry.alvoLat = ponto.lat;
+    estadoJerry.alvoLng = ponto.lng;
+  }
+
+  let dx = estadoJerry.lat - estadoTom.lat;
+  let dy = estadoJerry.lng - estadoTom.lng;
+
+  let dist = Math.sqrt(dx * dx + dy * dy) || 0.0001;
+
+  dx /= dist;
+  dy /= dist;
+
+  let alvoLat = estadoJerry.alvoLat +
+                dx * raioTJ * 0.5 +
+                (Math.random() - 0.5) * raioTJ * 0.2;
+
+  let alvoLng = estadoJerry.alvoLng +
+                dy * raioTJ * 0.5 +
+                (Math.random() - 0.5) * raioTJ * 0.2;
+
+  estadoJerry.vx += (alvoLat - estadoJerry.lat) * 0.003;
+  estadoJerry.vy += (alvoLng - estadoJerry.lng) * 0.003;
+
+  estadoJerry.vx *= 0.88;
+  estadoJerry.vy *= 0.88;
+
+  estadoJerry.lat += estadoJerry.vx;
+  estadoJerry.lng += estadoJerry.vy;
+}
+
+// 🐱 Tom
+function atualizarTom() {
+
+  estadoTom.timer--;
+
+  if (estadoTom.timer <= 0) {
+    estadoTom.timer = Math.floor(Math.random() * 80) + 30;
+
+    estadoTom.alvoLat = estadoJerry.lat + (Math.random() - 0.5) * 0.003;
+    estadoTom.alvoLng = estadoJerry.lng + (Math.random() - 0.5) * 0.003;
+  }
+
+  let ponto = buscarPontoMaisDenso(estadoTom.lat, estadoTom.lng);
+
+  let alvoLat = (estadoTom.alvoLat * 0.3) +
+                (estadoJerry.lat * 0.5) +
+                (ponto.lat * 0.2);
+
+  let alvoLng = (estadoTom.alvoLng * 0.3) +
+                (estadoJerry.lng * 0.5) +
+                (ponto.lng * 0.2);
+
+  estadoTom.vx += (alvoLat - estadoTom.lat) * 0.003;
+  estadoTom.vy += (alvoLng - estadoTom.lng) * 0.003;
+
+  estadoTom.vx *= 0.9;
+  estadoTom.vy *= 0.9;
+
+  estadoTom.lat += estadoTom.vx;
+  estadoTom.lng += estadoTom.vy;
+}
+
+// loop
+function animarTJ() {
+  atualizarJerry();
+  atualizarTom();
+
+  markerJerry.setLatLng([estadoJerry.lat, estadoJerry.lng]);
+  markerTom.setLatLng([estadoTom.lat, estadoTom.lng]);
+
+  requestAnimationFrame(animarTJ);
+}
+
+// inicia
+animarTJ();
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 300);
+});
+
+function toggleMenu() {
+  document.getElementById("menuFab").classList.toggle("ativo");
+}
+
+const CHAT_API = "https://script.google.com/macros/s/AKfycbwISa5yGn1dry6DNf-uV-aKUjL3DDasyoxnwgPZtneWHntGP0RRzffpGQtLT7ly3elI/exec";
+
+function toggleChat() {
+  const chatBox = document.getElementById("chatBox");
+  chatBox.classList.toggle("minimizado");
+}
+
+function enviarMensagem() {
+  const input = document.getElementById("chatInput");
+  const msg = input.value.trim();
+
+  if (!msg) return;
+
+  fetch(CHAT_API, {
+    method: "POST",
+    body: JSON.stringify({
+      usuario: usuario,
+      mensagem: msg
+    })
+  });
+
+  input.value = "";
+}
+
+// 🔄 Atualiza chat automaticamente
+function gerarCor(nome) {
+  let hash = 0;
+  for (let i = 0; i < nome.length; i++) {
+    hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return `hsl(${hash % 360}, 70%, 50%)`;
+}
+
+function carregarMensagens() {
+  fetch(CHAT_API)
+    .then(res => res.json())
+    .then(dados => {
+
+      const chat = document.getElementById("chatMensagens");
+      chat.innerHTML = "";
+
+      dados.forEach(item => {
+
+        const nome = item[0];
+        const mensagem = item[1];
+
+        if (!mensagem) return;
+
+        const cor = gerarCor(nome);
+
+        chat.innerHTML += `
+          <div style="
+            background:#f1f1f1;
+            padding:8px;
+            border-radius:10px;
+            margin-bottom:6px;
+            color:#000;
+          ">
+            <b style="color:${cor}">${nome}</b><br>
+            ${mensagem}
+          </div>
+        `;
+      });
+
+      chat.scrollTop = chat.scrollHeight;
+    });
+}
+
+// atualiza a cada 3s
+
+carregarMensagens(); // 🔥 carrega imediatamente
+setInterval(carregarMensagens, 3000);
+
+function gerarIdUnico() {
+  return Math.floor(Math.random() * 10000); // 4 dígitos
+}
+
+let usuario = localStorage.getItem("usuario");
+
+if (!usuario || usuario.trim() === "") {
+
+  let nomeDigitado = prompt("Digite seu nome:");
+
+  if (!nomeDigitado || nomeDigitado.trim() === "") {
+    usuario = "Visitante-" + gerarIdUnico();
+  } else {
+    usuario = nomeDigitado.trim();
+  }
+
+  localStorage.setItem("usuario", usuario);
+}
+
+document.getElementById("chatInput").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    enviarMensagem();
+  }
+});
+const API_KEY = "5576059ba04d38341105a8d3aae2bbad";
+const CACHE_TEMPO = 10 * 60 * 1000; // 10 minutos
+
+function carregarClima() {
+  const boxCity = document.getElementById("weatherCity");
+  const boxTemp = document.getElementById("weatherTemp");
+  const boxDesc = document.getElementById("weatherDesc");
+
+  // 🔥 CACHE LOCAL
+  const cache = localStorage.getItem("climaCache");
+
+  if (cache) {
+    const data = JSON.parse(cache);
+
+    if (Date.now() - data.tempo < CACHE_TEMPO) {
+      boxCity.innerText = "📍 " + data.cidade;
+      boxTemp.innerText = data.temp + "°C";
+      boxDesc.innerText = data.desc;
+      return;
+    }
+  }
+
+  boxCity.innerText = "📍 Obtendo localização...";
+  boxTemp.innerText = "...";
+  boxDesc.innerText = "";
+
+  if (!navigator.geolocation) {
+    boxCity.innerText = "❌ Sem suporte";
+    boxTemp.innerText = "--°C";
+    boxDesc.innerText = "Geolocalização indisponível";
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=pt_br&appid=${API_KEY}`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+
+          if (!data.main) throw new Error("API inválida");
+
+          const clima = {
+            cidade: data.name,
+            temp: Math.round(data.main.temp),
+            desc: data.weather[0].description,
+            tempo: Date.now()
+          };
+
+          // 🔥 salva cache
+          localStorage.setItem("climaCache", JSON.stringify(clima));
+
+          boxCity.innerText = "📍 " + clima.cidade;
+          boxTemp.innerText = clima.temp + "°C";
+          boxDesc.innerText = clima.desc;
+
+        })
+        .catch(() => {
+          boxCity.innerText = "❌ Erro ao carregar clima";
+          boxTemp.innerText = "--°C";
+          boxDesc.innerText = "";
+        });
+    },
+
+    (erro) => {
+      console.log("Erro geolocalização:", erro);
+
+      // 🔥 fallback inteligente
+      if (erro.code === 1) {
+        boxCity.innerText = "📍 Localização bloqueada";
+        boxDesc.innerText = "Usando dados anteriores";
+
+        const cache = localStorage.getItem("climaCache");
+        if (cache) {
+          const data = JSON.parse(cache);
+          boxCity.innerText = "📍 " + data.cidade;
+          boxTemp.innerText = data.temp + "°C";
+          boxDesc.innerText = data.desc;
+        }
+
+      } else {
+        boxCity.innerText = "📍 Erro de localização";
+        boxDesc.innerText = "Tente novamente";
+      }
+
+      boxTemp.innerText = "--°C";
+    },
+
+    {
+      enableHighAccuracy: false,
+      timeout: 8000,
+      maximumAge: 60000
+    }
+  );
+}
+
+// chama ao iniciar
+carregarClima();
+const legenda = L.control({ position: "bottomleft" });
+legenda.onAdd = function () {
+  const div = L.DomUtil.create("div", "legenda-mapa");
+
+  div.innerHTML = `
+    <b>Legenda</b><br>
+
+    <div><span style="background:#4CAF50"></span> 🐶 Adoção</div>
+    <div><span style="background:#FF9800"></span> 🚑 Resgate</div>
+    <div><span style="background:#2196F3"></span> 🙏 Ajuda</div>
+    <div><span style="background:#F44336"></span> 🔍 Perdido</div>
+
+    <hr>
+
+    <div><span style="background:#9C27B0"></span> 🤝 Parceiro</div>
+    <div><span style="background:#3F51B5"></span> 💙 Apoiador</div>
+    <div><span style="background:#009688"></span> 🛠️ Colaborador</div>
+  `;
+
+  return div;
+};
+
+function toggleLegenda() {
+  const box = document.getElementById("legendaInteligente");
+  const btn = document.getElementById("btnLegenda");
+
+  box.classList.toggle("minimizada");
+
+  if (box.classList.contains("minimizada")) {
+    btn.innerText = "➕";
+  } else {
+    btn.innerText = "➖";
+  }
+}
+const FOTO_SETINHO = "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Setinho.jpg?raw=true";
+const frasesSetinho = [
+
+  "🐶 Obrigado por ajudar meus amigos.",
+  "💖 Cada adoção muda uma vida.",
+  "🌎 Continue espalhando esperança.",
+  "🐾 Hoje alguém precisa de carinho.",
+  "✨ Você está fazendo diferença."
+];
+
+const missoesSetinho = [
+
+  "📢 Compartilhe um pet hoje",
+  "🥣 Ajude um animal com água",
+  "🐾 Visite um abrigo parceiro",
+  "💖 Convide alguém para adotar",
+  "📸 Poste um pet do AdotPet"
+];
+
+function gerarPosicaoAleatoria() {
+
+  const petAleatorio =
+    pets[Math.floor(Math.random() * pets.length)];
+
+  return {
+    lat: petAleatorio.lat +
+         (Math.random() - 0.5) * 0.01,
+
+    lng: petAleatorio.lng +
+         (Math.random() - 0.5) * 0.01
+  };
+}
+
+const iconeSetinho = L.divIcon({
+
+  className: "",
+
+  html: `
+    <div class="setinho-npc" style="
+      width:70px;
+      height:70px;
+      border-radius:50%;
+      overflow:hidden;
+      border:4px solid gold;
+      background:white;
+    ">
+
+      <img src="${FOTO_SETINHO}"
+           style="
+             width:100%;
+             height:100%;
+             object-fit:cover;
+           ">
+
+    </div>
+  `,
+
+  iconSize: [70, 70],
+  iconAnchor: [35, 35]
+});
+
+let markerSetinho = null;
+
+function aparecerSetinho() {
+
+  // remove antigo
+  if (markerSetinho) {
+    map.removeLayer(markerSetinho);
+  }
+
+  const pos = gerarPosicaoAleatoria();
+
+  markerSetinho = L.marker(
+    [pos.lat, pos.lng],
+    { icon: iconeSetinho }
+  ).addTo(map);
+
+  const frase =
+    frasesSetinho[
+      Math.floor(Math.random() * frasesSetinho.length)
+    ];
+
+  const missao =
+    missoesSetinho[
+      Math.floor(Math.random() * missoesSetinho.length)
+    ];
+
+  markerSetinho.bindPopup(`
+    <div style="
+      text-align:center;
+      width:220px;
+    ">
+
+      <img src="${FOTO_SETINHO}"
+           style="
+             width:100%;
+             border-radius:12px;
+           ">
+
+      <h3>✨Setinho✨</h3>
+
+      <p>${frase}</p>
+
+      <hr>
+
+      <b>🎯 Missão:</b><br>
+      ${missao}
+
+      <br><br>
+
+      <button onclick="aceitarMissaoSetinho()"
+              style="
+                background:#FFD700;
+                border:none;
+                padding:10px;
+                border-radius:8px;
+                cursor:pointer;
+                font-weight:bold;
+              ">
+        💖 Aceitar Missão
+      </button>
+
+    </div>
+  `);
+
+  // desaparece depois de um tempo
+  setTimeout(() => {
+
+    if (markerSetinho) {
+
+      map.removeLayer(markerSetinho);
+
+      markerSetinho = null;
+    }
+
+  }, 120000); // 2 minutos
+}
+function aceitarMissaoSetinho() {
+
+  alert(`
+✨ Missão aceita!
+
+🏅 Você ganhou:
++20 Pontos de Esperança
+`);
+
+}
+
+// aparece pela primeira vez
+// ⏰ tempo para primeira aparição
+const PRIMEIRA_APARICAO_SETINHO = 1000*30; // 1/2 min
+
+// 🔁 intervalo de verificação
+const INTERVALO_SETINHO = 1000*30; // 1/2 min
+
+// 🎲 chance de aparecer
+const CHANCE_SETINHO = 0.45; // 45%
+
+// 🌟 primeira aparição
+setTimeout(() => {
+
+  aparecerSetinho();
+
+}, PRIMEIRA_APARICAO_SETINHO);
+
+// 🔄 verificações contínuas
+setInterval(() => {
+
+  if (!markerSetinho && Math.random() < CHANCE_SETINHO) {
+
+    aparecerSetinho();
+
+  }
+
+}, INTERVALO_SETINHO);
+</script>
+
+</body>
+</html>
