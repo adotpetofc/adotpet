@@ -1,1 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Cadastro de Pets - AdotPet</title>
 
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  margin: 0;
+}
+
+.container {
+  width: 420px;
+  margin: 50px auto;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: #2ecc71;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+button:hover {
+  background: #27ae60;
+}
+
+#msg {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+  <h1>Cadastro de Pet</h1>
+
+  <form id="petForm">
+    <input type="text" id="animal" placeholder="Nome do animal" required>
+    <input type="text" id="contato" placeholder="Contato" required>
+    <input type="text" id="foto" placeholder="URL da foto (raw GitHub)" required>
+    <input type="number" step="any" id="lat" placeholder="Latitude" required>
+    <input type="number" step="any" id="lng" placeholder="Longitude" required>
+
+    <select id="status" required>
+      <option value="adotar">Adotar</option>
+      <option value="resgatar">Resgatar</option>
+      <option value="adotado">Adotado</option>
+      <option value="apoiador">Apoiador</option>
+      <option value="parceiro">Parceiro</option>
+      <option value="colaborador">Colaborador</option>
+    </select>
+
+    <button type="submit">Cadastrar Pet</button>
+  </form>
+
+  <p id="msg"></p>
+</div>
+
+<script>
+// 🔴 CONFIGURAÇÕES GITHUB
+const GITHUB_TOKEN = "SEU_TOKEN_AQUI";
+const REPO = "LeonardoSaintAna/adotpet-data";
+const FILE_PATH = "pets.js";
+const BRANCH = "main";
+
+const form = document.getElementById("petForm");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const pet = {
+    animal: document.getElementById("animal").value,
+    contato: document.getElementById("contato").value,
+    foto: document.getElementById("foto").value,
+    lat: parseFloat(document.getElementById("lat").value),
+    lng: parseFloat(document.getElementById("lng").value),
+    status: document.getElementById("status").value
+  };
+
+  document.getElementById("msg").innerText = "Enviando...";
+
+  try {
+    await salvarNoGitHub(pet);
+    document.getElementById("msg").innerText = "✅ Pet cadastrado com sucesso!";
+    form.reset();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("msg").innerText = "❌ Erro ao cadastrar pet.";
+  }
+});
+
+async function salvarNoGitHub(novoPet) {
+
+  const url = `https://api.github.com/repos/${REPO}/contents/${FILE_PATH}`;
+
+  // 1. pega arquivo atual
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`
+    }
+  });
+
+  const data = await res.json();
+
+  // 2. decodifica base64
+  const conteudoAtual = atob(data.content);
+
+  // 3. extrai array
+  let petsArray;
+
+  try {
+    petsArray = eval(conteudoAtual.replace("const pets =", "").trim());
+  } catch (e) {
+    petsArray = [];
+  }
+
+  // 4. adiciona novo pet
+  petsArray.push(novoPet);
+
+  // 5. recria arquivo
+  const novoArquivo = `const pets = ${JSON.stringify(petsArray, null, 2)};`;
+
+  // 6. envia pro GitHub
+  await fetch(url, {
+    method: "PUT",
+    headers: {
+      Authorization: `token ${GITHUB_TOKEN}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: "Novo pet cadastrado via formulário",
+      content: btoa(novoArquivo),
+      sha: data.sha,
+      branch: BRANCH
+    })
+  });
+}
+</script>
+
+</body>
+</html>
