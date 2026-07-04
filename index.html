@@ -243,9 +243,9 @@ body {
   background: linear-gradient(135deg, #3F51B5, #7B1FA2);
   color: white;
   border: none;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding:8px 16px;
+  font-size:24px;
+  border-radius:12px;
   font-weight: bold;
 }
 
@@ -266,8 +266,8 @@ body {
 .barra-busca input {
   border:none;
   outline:none;
-  font-size:14px;
-  width:200px;
+  font-size:28px;
+  width:400px;
   padding:6px 8px;
   border-radius:6px;
 }
@@ -990,7 +990,7 @@ pets.forEach(item => {
   const iconePet = L.divIcon({
   className: "",
   html: `
-    <div style="position:relative;width:60px;height:60px;">
+    <div style="position:relative;width:120px;height:120px;">
 
       <!-- 🔥 SÍMBOLO EMBAIXO -->
       <div style="
@@ -999,9 +999,9 @@ pets.forEach(item => {
         right:-8px;
         background:${cor};
         color:white;
-        font-size:14px;
-        width:22px;
-        height:22px;
+        font-size:28px;
+        width:44px;
+        height:44px;
         display:flex;
         align-items:center;
         justify-content:center;
@@ -1014,11 +1014,11 @@ pets.forEach(item => {
 
       <!-- FOTO -->
       <div style="
-        width:60px;
-        height:60px;
+        width:120px;
+        height:120px;
         border-radius:50%;
         overflow:hidden;
-        border:4px solid ${cor};
+        border:8px solid ${cor};
         box-shadow:0 4px 10px rgba(0,0,0,0.5);
         background:white;
       ">
@@ -1029,9 +1029,9 @@ pets.forEach(item => {
 
     </div>
   `,
-  iconSize: [60, 60],
-  iconAnchor: [30, 30],
-  popupAnchor: [0, -30]
+  iconSize: [120, 120],
+  iconAnchor: [60, 60],
+  popupAnchor: [0, -60]
 });
 
   let marker = L.marker([item.lat, item.lng], { icon: iconePet });
@@ -1045,7 +1045,7 @@ pets.forEach(item => {
 
   marker.bindPopup(`
 <div style="
-    width:215px;
+    width:430px;
     background:#ffffff;
     border-radius:22px;
     overflow:hidden;
@@ -1057,7 +1057,7 @@ pets.forEach(item => {
 <div style="
     position:relative;
     width:100%;
-    height:180px;
+    height:360px;
 ">
 
     <img src="https://images.weserv.nl/?url=${encodeURIComponent(item.foto)}"
@@ -1084,7 +1084,7 @@ pets.forEach(item => {
     right:12px;
     bottom:10px;
     color:white;
-    font-size:15px;
+    font-size:30px;
     font-weight:600;
     text-shadow:0 2px 4px rgba(0,0,0,.7);
     white-space:nowrap;
@@ -1117,7 +1117,7 @@ pets.forEach(item => {
 
         <div style="
             text-align:center;
-            font-size:11px;
+            font-size:22px;
             color:#666;
             margin-bottom:10px;
         ">
@@ -1134,7 +1134,7 @@ pets.forEach(item => {
                 text-align:center;
                 padding:7px;
                 border-radius:12px;
-                font-size:11px;
+                font-size:22px;
                 font-weight:bold;
                 margin-bottom:6px;
             ">
@@ -1151,7 +1151,7 @@ pets.forEach(item => {
                 text-align:center;
                 padding:7px;
                 border-radius:12px;
-                font-size:11px;
+                font-size:22px;
                 font-weight:bold;
             ">
             📍 Ver localização
@@ -1203,8 +1203,8 @@ function criarLegenda() {
       <div class="legenda-left">
         <span style="
           display:inline-block;
-          width:10px;
-          height:10px;
+          width:20px;
+          height:20px;
           border-radius:3px;
           background:${cor};
         "></span>
@@ -1258,11 +1258,11 @@ parceiros.forEach(p => {
     className: "",
     html: `
       <div style="
-        width:60px;
-        height:60px;
+        width:120px;
+        height:120px;
         border-radius:50%;
         overflow:hidden;
-        border:4px solid white;
+        border:8px solid white;
         box-shadow:0 4px 10px rgba(0,0,0,0.5);
         background:white;
       ">
@@ -1857,11 +1857,11 @@ const iconeSetinho = L.divIcon({
 
   html: `
     <div class="setinho-npc" style="
-      width:70px;
-      height:70px;
+      width:140px;
+      height:140px;
       border-radius:50%;
       overflow:hidden;
-      border:4px solid gold;
+      border:8px solid gold;
       background:white;
     ">
 
@@ -1875,8 +1875,8 @@ const iconeSetinho = L.divIcon({
     </div>
   `,
 
-  iconSize: [70, 70],
-  iconAnchor: [35, 35]
+  iconSize: [140,140],
+  iconAnchor: [70,70]
 });
 
 let markerSetinho = null;
