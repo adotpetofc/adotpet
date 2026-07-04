@@ -571,7 +571,7 @@ body {
   <button class="fab-main" onclick="toggleMenu()">☰</button>
 
   <div class="fab-options">
-    <button class="fab-btn btn-form" onclick="abrirFormulario()">➕ Cadastrar Pet</button>
+    <button class="fab-btn btn-form" onclick="abrirCadastro()">➕ Cadastrar Pet</button>
     <button class="fab-btn btn-wpp" onclick="abrirGrupo()">💬 Grupo WhatsApp</button>
     <button class="fab-btn btn-pix" onclick="abrirPix()">💖 Apoiar</button>
   </div>
@@ -625,6 +625,10 @@ body {
 const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdw1-6EqCFyd0bR8PoiKFF16i3k2qhp-vRclKHiSFrA0JYXAA/viewform";
 const WHATSAPP_URL = "https://chat.whatsapp.com/HIlAlWLbnJn8Kf5Hq9lHrf?mode=gi_t";
 const APOIA_URL = "https://sites.google.com/view/adotpet/apoiar";
+
+function abrirCadastro() {
+  window.location.href = "cadastro.html";
+}
 
 function abrirFormulario() {
   window.open(FORM_URL, "_blank");
