@@ -490,7 +490,17 @@ body {
 
 /* aplica no conteúdo do popup */
 .leaflet-popup-content {
+  width: 360px !important;
+  max-width: 360px !important;
+  margin: 10px;
   animation: aparecerCard 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+
+}
+
+.leaflet-popup-content-wrapper {
+  width: 500px;
+  max-width: 370px;
+  border-radius: 30px;
 }
 
 /* ✨ brilho do Setinho */
@@ -1049,7 +1059,7 @@ pets.forEach(item => {
 
   marker.bindPopup(`
 <div style="
-    width:430px;
+    width:350px;
     background:#ffffff;
     border-radius:22px;
     overflow:hidden;
@@ -1125,7 +1135,7 @@ pets.forEach(item => {
             color:#666;
             margin-bottom:10px;
         ">
-            🐾 Procura um novo lar cheio de amor
+
         </div>
 
         <a href="https://wa.me/${item.contato}"
