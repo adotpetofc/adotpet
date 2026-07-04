@@ -315,14 +315,14 @@ body {
 
 #chatBox {
   position: fixed;
-  bottom: 10px; /* diminui um pouco */
+  bottom: 10px;
   right: 10px;
 
   width: 80vw;
   max-width: 500px;
 
-  height: 55dvh;
-  max-height: 650px;
+  height: 45dvh;
+  max-height: 500px;
 }
 
 /* 🔥 garante que o input nunca suma */
@@ -1054,7 +1054,7 @@ pets.forEach(item => {
   marker.bindTooltip(item.animal, {
     permanent: true,
     direction: "top",
-    offset: [0, -10],
+    offset: [10, -60],
     className: "label-mapa"
   }).openTooltip();
 
