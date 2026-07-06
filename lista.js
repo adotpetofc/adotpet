@@ -12,8 +12,8 @@ const pets = [
     animal: "Ariana",
     contato: "7996701204",
     foto: "https://github.com/adotpetofc/adotpet/blob/main/ariana.png?raw=true",
-    lat: -10.7736657980013, 
-    lng: -37.837700966594916,
+    lat: -10.773668143479119, 
+    lng: -37.83769976810128,
     status: "adotar"
   },
   {
