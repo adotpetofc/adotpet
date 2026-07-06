@@ -303,21 +303,5 @@ const pets = [
     lat: -10.773668832498164,
     lng: -37.83777687504117,
     status: "adotar"
-  },
-  {
-    animal: "Briana",
-    contato: "7996701204",
-    foto: "https://github.com/adotpetofc/adotpet/blob/main/imagens/briana.png?raw=true",
-    lat: -10.773726750041178, 
-    lng: -37.83775337580061,
-    status: "adotar"
-  },
-  {
-    animal: "Ariana",
-    contato: "7996701204",
-    foto: "https://github.com/adotpetofc/adotpet/blob/main/imagens/ariana.png?raw=true",
-    lat: ,-10.7736657980013, 
-    lng: -37.837700966594916,
-    status: "adotar"
   }
 ];
