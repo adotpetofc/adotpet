@@ -11,7 +11,7 @@ const pets = [
   {
     animal: "Briana",
     contato: "7996701204",
-    foto: "https://github.com/adotpetofc/adotpet/blob/main/imagens/briana.png?raw=true",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/briana.png?raw=true",
     lat: -10.773726750041178, 
     lng: -37.83775337580061,
     status: "adotar"
@@ -19,7 +19,7 @@ const pets = [
   {
     animal: "Ariana",
     contato: "7996701204",
-    foto: "https://github.com/adotpetofc/adotpet/blob/main/imagens/ariana.png?raw=true",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/ariana.png?raw=true",
     lat: ,-10.7736657980013, 
     lng: -37.837700966594916,
     status: "adotar"
