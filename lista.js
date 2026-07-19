@@ -312,7 +312,7 @@ const pets = [
     status: "adotado"
   },
   {
-    animal: "Pretinho",
+    animal: "Pretinho.",
     contato: "7996701204",
     foto: "https://github.com/adotpetofc/adotpet/blob/main/pretinho.png?raw=true",
     lat: -10.909350097002461,
