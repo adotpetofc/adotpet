@@ -314,7 +314,7 @@ const pets = [
   {
     animal: "Pretinho",
     contato: "7996701204",
-    foto: "https://github.com/LeonardoSaintAna/imagem_adotpet-/blob/main/Pretinho.jpeg?raw=true",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/pretinho.jpeg?raw=true",
     lat: -10.909350097002461,
     lng: -37.65956199568748,
     status: "adotar"
