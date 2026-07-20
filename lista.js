@@ -1,8 +1,8 @@
 const pets = [
   {
-    animal: "gato1",
+    animal: "Scar",
     contato: "7598007383",
-    foto: " ",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/scar.jpeg?raw=true",
     lat: -10.673489680109393, 
     lng: -37.87525666437494,
     status: "adotar",
