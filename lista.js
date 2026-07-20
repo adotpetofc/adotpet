@@ -16,9 +16,9 @@ const pets = [
     status: "adotar",
   },
   {
-    animal: "gato3",
+    animal: "Mimi",
     contato: "7598007383",
-    foto: " ",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/mimi.jpeg?raw=true",
     lat: -10.673759507092129, 
     lng: -37.87523173797941,
     status: "adotar",
