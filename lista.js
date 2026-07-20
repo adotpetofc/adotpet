@@ -8,9 +8,9 @@ const pets = [
     status: "adotar",
   },
   {
-    animal: "gato2",
+    animal: "Nefiti",
     contato: "7598007383",
-    foto: " ",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/nefiti.jpeg?raw=true",
     lat: -10.673718049194136, 
     lng: -37.87509223575766,
     status: "adotar",
