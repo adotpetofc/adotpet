@@ -1,5 +1,37 @@
 const pets = [
   {
+    animal: "gato1",
+    contato: "7598007383",
+    foto: " ",
+    lat: -10.673489680109393, 
+    lng: -37.87525666437494,
+    status: "adotar",
+  },
+  {
+    animal: "gato2",
+    contato: "7598007383",
+    foto: " ",
+    lat: -10.673718049194136, 
+    lng: -37.87509223575766,
+    status: "adotar",
+  },
+  {
+    animal: "gato3",
+    contato: "7598007383",
+    foto: " ",
+    lat: -10.673759507092129, 
+    lng: -37.87523173797941,
+    status: "adotar",
+  },
+  {
+    animal: "gato4",
+    contato: "7598007383",
+    foto: " ",
+    lat: -10.673805262113074, 
+    lng: -37.8750955676781,
+    status: "adotar",
+  },
+  {
     animal: "Aira",
     contato: "7998254127",
     foto: "https://github.com/adotpetofc/adotpet/blob/main/aira.jpeg?raw=true",
