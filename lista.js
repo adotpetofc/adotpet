@@ -2,7 +2,7 @@ const pets = [
   {
     animal: "Neve",
     contato: "7996006391",
-    foto: "https://github.com/adotpetofc/adotpet/blob/main/mel.jpeg?raw=true",
+    foto: "https://github.com/adotpetofc/adotpet/blob/main/neve.jpeg?raw=true",
     lat: -10.910031809634463,   
     lng: -37.69379313768288,
     status: "resgatar",
